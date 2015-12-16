@@ -1,0 +1,113 @@
+private string gmail_password = "";
+        private string gmail_mail = "";
+
+        public string GetValidateCode()
+        {
+            string Code = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz";
+
+            string ValidateCode = string.Empty;
+
+            Random rd = new Random();
+
+            for (int i = 0; i < 10; i++)
+            {
+                ValidateCode += Code.Substring(rd.Next(0, Code.Length - 1), 1);
+            }
+            return ValidateCode;
+        }
+
+        public string GetMailBody(string TempString, string UserName, string ValidateUrl)
+        {
+            TempString = TempString.Replace("{{UserName}}", UserName);
+
+            TempString = TempString.Replace("{{ValidateUrl}}", ValidateUrl);
+
+            return TempString;
+        }
+
+        public void SendMail(string MailSubject, string MailBody, string ToEmail)
+        {
+            SmtpClient SmtpServer = new SmtpClient("smtp.gmail.com");
+
+            gmail_mail = "bill@sunlight.tw";
+
+            gmail_password = "tvfsibanlomwixcd";
+
+            SmtpServer.Port = 587;
+
+            SmtpServer.Credentials = new System.Net.NetworkCredential(gmail_mail, gmail_password);
+
+            SmtpServer.EnableSsl = true;
+
+            MailMessage mail = new MailMessage();
+
+            mail.From = new MailAddress(gmail_mail);
+
+            mail.To.Add(ToEmail);
+
+            mail.Subject = MailSubject;
+
+            mail.Body = MailBody;
+
+            mail.IsBodyHtml = true;
+
+            SmtpServer.Send(mail);
+        }
+
+        public string EmailValidate(string Email, string AuthCode)
+        {
+            string ValidateStr = string.Empty;
+
+            using (var conn = new SqlConnection(ConfigurationManager.ConnectionStrings["mndshopDB"].ConnectionString))
+            {
+                conn.Open();
+                
+                var MemberFromDB = conn.Query<Member>(
+                                                    @"select [Member_AuthCode],[Member_Email] from Member 
+                                                      where 
+                                                      [Member_Email] = @EmailParam 
+                                                      ",
+                                                    new
+                                                    {
+                                                        EmailParam = Email,
+                                                    }
+                                                    ).FirstOrDefault();
+                
+                if (MemberFromDB != null)
+                {
+                    
+                    if (MemberFromDB.Member_AuthCode==AuthCode)
+                    {
+
+                        conn.Execute(
+                            @"UPDATE [Member]
+                             SET 
+                             [Member_AuthCode] = null,
+                             [Member_EmailConfirm] = @EmailConfirmParam  
+                             where 
+                             Member_AuthCode=@AuthCodeParam",
+                            new
+                            {
+                                AuthCodeParam = AuthCode,
+                                EmailConfirmParam = true,
+                            }
+                            );
+
+                        ValidateStr = "驗證成功";
+                    }
+                    else
+                    {
+                        ValidateStr = "驗證碼錯誤!!";
+                    }
+                    
+
+                }
+                else
+                {
+                    ValidateStr = "資料傳送錯誤，請重新確認或再註冊!!";
+                }
+            }
+
+            return ValidateStr;
+
+        }
