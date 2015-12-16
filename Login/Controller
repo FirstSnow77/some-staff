@@ -1,0 +1,42 @@
+//
+        // GET: /Account/Login
+        [AllowAnonymous]
+        
+        //
+        // POST: /Account/Login
+        //if there is a page to redirect,change this to POST
+        public ActionResult Login(Member member,string returnUrl)
+        {
+            string userData = mailService.GetValidateCode();
+            
+            string ValidateStr = memberService.LoginCheck(member);
+
+            if (string.IsNullOrEmpty(ValidateStr))
+            {
+                Session.RemoveAll();
+
+                FormsAuthenticationTicket ticket =
+                    new FormsAuthenticationTicket(
+                        1,
+                        member.Member_Email,
+                        DateTime.Now,
+                        DateTime.Now.AddMinutes(30),
+                        false,
+                        userData,
+                        FormsAuthentication.FormsCookiePath
+                        );
+
+                string enTicket = FormsAuthentication.Encrypt(ticket);
+
+                Response.Cookies.Add(new HttpCookie(FormsAuthentication.FormsCookieName, enTicket));
+
+                return RedirectToAction("Index", "Home");
+            }
+            else
+            {
+                TempData["message"] = ValidateStr;
+
+                return RedirectToAction("Index", "Home");
+
+            }
+        }
