@@ -1,0 +1,22 @@
+@using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { autocomplete = "off" }))
+    {
+        <div id="lightbox1">
+            <div class="lb_bg"></div>
+            <div class="lb_in">
+                <div class="login_all">
+                    </div>
+                    <div id="lo_2">
+                        <div class="lo_in_1">信箱</div>
+                        <input name="Member_Email" type="text" class="lo_in_input" /><div class="clear"></div>
+                    </div>
+                    <div class="lo_in2">
+                        <div class="lo_in_1">密碼</div>
+                        <input name="Member_Password" type="password" class="lo_in_input" /><div class="clear"></div>
+                    </div>
+                    <div id="lo_4">
+                        <input type="submit" class="lo_btn_7 " value="登　　入" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
