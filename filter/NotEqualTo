@@ -1,0 +1,42 @@
+public class NotEqualToAttribute : ValidationAttribute, IClientValidatable
+    {
+        public string OtherProperty { get; private set; }
+
+        public NotEqualToAttribute(string otherProperty)
+        {
+            OtherProperty = otherProperty;
+        }
+
+        protected override ValidationResult IsValid(object value, System.ComponentModel.DataAnnotations.ValidationContext validationContext)
+        {
+            var property = validationContext.ObjectType.GetProperty(OtherProperty);
+
+            if (property == null)
+            {
+                return new ValidationResult(string.Format(CultureInfo.CurrentUICulture, "{0} 不存在", OtherProperty));
+            }
+
+            var otherValue = property.GetValue(validationContext.ObjectInstance, null);
+
+            if (object.Equals(value, otherValue))
+            {
+                return new ValidationResult(FormatErrorMessage(validationContext.DisplayName));
+            }
+
+            return null;
+
+        }
+
+        public IEnumerable<ModelClientValidationRule> GetClientValidationRules(ModelMetadata metadata, ControllerContext context)
+        {
+            var rule = new ModelClientValidationRule
+            {
+                ErrorMessage = FormatErrorMessage(metadata.GetDisplayName()),
+                ValidationType = "notequalto"
+            };
+
+            rule.ValidationParameters["other"] = OtherProperty;
+
+            yield return rule;
+        }
+    }
