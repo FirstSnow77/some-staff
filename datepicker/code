@@ -1,0 +1,21 @@
+<!--calendar-->
+  <script src="Scripts/js/jquery-ui.js"></script>
+  <script>
+  $(function() {
+      $("#ContentPlaceholder1_datepicker_start").datepicker({
+          dateFormat: 'yy / mm / dd',
+          rangeSelect: true,
+          firstDay: 7,
+          showOn: "focus",                   //"focus","button","both"
+          maxDate: "",
+          minDate: new Date(2007, 1 - 1, 1),
+          currentText: "Now",
+          defaultDate: +0,
+          onSelect : function(date,obj){
+              $("#ContentPlaceholder1_datepicker_end").datepicker( "option", "minDate", date);
+              //$("#ContentPlaceholder1_datepicker_end").val(date); //將選擇日期於datepicker_end欄位中顯示出來
+          }
+      });
+  });
+  </script>
+<!--calendar END-->
